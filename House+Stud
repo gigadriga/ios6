@@ -1,0 +1,80 @@
+//Создание класса родитель и 2 наследников
+class Shape {
+    var color: String
+    
+    init(_ color: String) {
+        self.color = color
+    }
+}
+
+class Circle: Shape {
+    var radius: Double
+    
+    init(_ radius: Double, _ color: String) {
+        self.radius = radius
+        super.init(color)
+    }
+}
+
+class Rectangle: Shape {
+    var width: Double
+    var height: Double
+    
+    init(_ width: Double, _ height: Double, _ color: String) {
+        self.width = width
+        self.height = height
+        super.init(color)
+    }
+}
+
+//Создание класса House
+class House {
+    var width: Double
+    var height: Double
+    var destroyed: Bool = false
+    
+    init(_ width: Double, _ height: Double) {
+        self.width = width
+        self.height = height
+    }
+    
+    func create() {
+        let area = width * height
+        print("Дом площадью \(area) квадратных метров создан")
+    }
+    
+    func destroy() {
+        destroyed = true
+        print("Дом уничтожен")
+    }
+}
+//Класс для сортировки массива учеников по разным параметрам
+class StudentManager {
+    var students: [Student] = []
+    
+    func sortByLastName() {//сортировка учеников по фамилиям
+        students.sort {
+            $0.lastName < $1.lastName
+        }
+    }
+    
+    func sortByAverageGrade() {//сортировка учеников по успечваемости
+        students.sort {
+            $0.averageGrade > $1.averageGrade
+        }
+    }
+}
+
+class Student {//создание класса ученик
+    var firstName: String
+    var lastName: String
+    var age: Int
+    var averageGrade: Double
+    
+    init(_ firstName: String, _ lastName: String, _ age: Int, _ averageGrade: Double) {
+        self.firstName = firstName
+        self.lastName = lastName
+        self.age = age
+        self.averageGrade = averageGrade
+    }
+}
