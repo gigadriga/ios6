@@ -1,0 +1,195 @@
+//Игра в покер
+import Foundation
+
+// Определяем масти и стоимости карт
+let suits = ["Пик", "Треф", "Черви", "Бубен"]
+let values = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "Валет", "Дама", "Король", "Туз"]
+
+// Создаем массив для хранения комбинаций
+var combinations: [String] = []
+
+// Генерируем 5 случайных карт и добавляем их в массив комбинаций
+for _ in 1...5 {
+    let randomSuit = suits.randomElement()!
+    let randomValue = values.randomElement()!
+    combinations.append("\(randomValue) \(randomSuit)")
+}
+
+// Выводим комбинации в консоль
+print("Карты на столе:")
+for combination in combinations {
+    print(combination)
+}
+
+// Проверяем наличие комбинаций
+if hasRoyalFlush(values: values, suits: suits, combinations: combinations) {
+    print("У вас рояль-флеш!")
+} else if hasStraightFlush(values: values, suits: suits, combinations: combinations) {
+    print("У вас стрит-флеш!")
+} else if hasFourOfAKind(values: values, combinations: combinations) {
+    print("У вас каре!")
+} else if hasFullHouse(values: values, combinations: combinations) {
+    print("У вас фул-хаус!")
+} else if hasFlush(suits: suits, combinations: combinations) {
+    print("У вас флеш!")
+} else if hasStraight(values: values, combinations: combinations) {
+    print("У вас стрит!")
+} else if hasThreeOfAKind(values: values, combinations: combinations) {
+    print("У вас трипс!")
+} else if hasTwoPair(values: values, combinations: combinations) {
+    print("У вас две пары!")
+} else if hasPair(values: values, combinations: combinations) {
+    print("У вас пара!")
+} else {
+    print("У вас высокая карта!")
+}
+
+// Функция проверки наличия рояль-флеша
+func hasRoyalFlush(values: [String], suits: [String], combinations: [String]) -> Bool {
+    // Проверяем, есть ли в комбинации туз, король, дама, валет и десятка одной масти
+    let royalCards = ["Туз", "Король", "Дама", "Валет", "10"]
+    for suit in suits {
+        let royalFlush = royalCards.compactMap { royalCard in
+            combinations.first { card in
+                card.contains(royalCard) && card.contains(suit)
+            }
+        }
+        if royalFlush.count == 5 {
+            return true
+        }
+    }
+    return false
+}
+
+// Функция проверки наличия стрит-флеша
+func hasStraightFlush(values: [String], suits: [String], combinations: [String]) -> Bool {
+    // Проверяем, есть ли в комбинации пять карт одной масти и с последовательными стоимостями
+    for suit in suits {
+        let suitCards = combinations.filter { $0.contains(suit) }
+        if suitCards.count >= 5 {
+            let suitValues = suitCards.compactMap { combination in
+                values.first { combination.contains($0) }
+            }
+            let sortedValues = suitValues.sorted { values.firstIndex(of: $0)! < values.firstIndex(of: $1)! }
+            for i in 0...(sortedValues.count - 5) {
+                if sortedValues[i...(i + 4)].joined(separator: "") == "23456"
+                    || sortedValues[i...(i + 4)].joined(separator: "") == "34567"
+                    || sortedValues[i...(i + 4)].joined(separator: "") == "45678"
+                    || sortedValues[i...(i + 4)].joined(separator: "") == "56789"
+                    || sortedValues[i...(i + 4)].joined(separator: "") == "678910"
+                    || sortedValues[i...(i + 4)].joined(separator: "") == "78910Валет"
+                    || sortedValues[i...(i + 4)].joined(separator: "") == "8910ВалетДама"
+                    || sortedValues[i...(i + 4)].joined(separator: "") == "910ВалетДамаКороль"
+                    || sortedValues[i...(i + 4)].joined(separator: "") == "10ВалетДамаКорольТуз" {
+                    return true
+                }
+            }
+        }
+    }
+    return false
+}
+
+// Функция проверки наличия каре
+func hasFourOfAKind(values: [String], combinations: [String]) -> Bool {
+    // Проверяем, есть ли в комбинации 4 карты одного достоинства
+    for value in values {
+        let valueCards = combinations.filter { $0.contains(value) }
+        if valueCards.count >= 4 {
+            return true
+        }
+    }
+    return false
+}
+
+// Функция проверки наличия фул-хауса
+func hasFullHouse(values: [String], combinations: [String]) -> Bool {
+    // Проверяем, есть ли в комбинации 3 карты одного достоинства и 2 карты другого достоинства
+    var threeOfAKind: String?
+    var twoOfAKind: String?
+    for value in values.reversed() {
+        let valueCards = combinations.filter { $0.contains(value) }
+        if valueCards.count >= 3 {
+            threeOfAKind = value
+        } else if valueCards.count >= 2 {
+            twoOfAKind = value
+        }
+        if threeOfAKind != nil && twoOfAKind != nil {
+            return true
+        }
+    }
+    return false
+}
+
+// Функция проверки наличия флеша
+func hasFlush(suits: [String], combinations: [String]) -> Bool {
+    // Проверяем, есть ли в комбинации пять карт одной масти
+    for suit in suits {
+        let suitCards = combinations.filter { $0.contains(suit) }
+        if suitCards.count >= 5 {
+            return true
+        }
+    }
+    return false
+}
+
+// Функция проверки наличия стрита
+func hasStraight(values: [String], combinations: [String]) -> Bool {
+    // Проверяем, есть ли в комбинации пять карт с последовательными стоимостями
+    let uniqueValues = Array(Set(combinations.compactMap { combination in
+        values.first { combination.contains($0) }
+    })).sorted { values.firstIndex(of: $0)! < values.firstIndex(of: $1)! }
+    for i in 0...(uniqueValues.count - 5) {
+        if uniqueValues[i...(i + 4)].joined(separator: "") == "23456"
+            || uniqueValues[i...(i + 4)].joined(separator: "") == "34567"
+            || uniqueValues[i...(i + 4)].joined(separator: "") == "45678"
+            || uniqueValues[i...(i + 4)].joined(separator: "") == "56789"
+            || uniqueValues[i...(i + 4)].joined(separator: "") == "678910"
+            || uniqueValues[i...(i + 4)].joined(separator: "") == "78910Валет"
+            || uniqueValues[i...(i + 4)].joined(separator: "") == "8910ВалетДама"
+            || uniqueValues[i...(i + 4)].joined(separator: "") == "910ВалетДамаКороль"
+            || uniqueValues[i...(i + 4)].joined(separator: "") == "10ВалетДамаКорольТуз" {
+            return true
+        }
+    }
+    return false
+}
+
+// Функция проверки наличия трипса
+func hasThreeOfAKind(values: [String], combinations: [String]) -> Bool {
+    // Проверяем, есть ли в комбинации 3 карты одного достоинства
+    for value in values {
+        let valueCards = combinations.filter { $0.contains(value) }
+        if valueCards.count >= 3 {
+            return true
+        }
+    }
+    return false
+}
+
+// Функция проверки наличия двух пар
+func hasTwoPair(values: [String], combinations: [String]) -> Bool {
+    // Проверяем, есть ли в комбинации две пары карт одного достоинства
+    var pairs: Int = 0
+    for value in values.reversed() {
+        let valueCards = combinations.filter { $0.contains(value) }
+        if valueCards.count >= 2 {
+            pairs += 1
+        }
+        if pairs == 2 {
+            return true
+        }
+    }
+    return false
+}
+
+// Функция проверки наличия пары
+func hasPair(values: [String], combinations: [String]) -> Bool {
+    // Проверяем, есть ли в комбинации 2 карты одного достоинства
+    for value in values {
+        let valueCards = combinations.filter { $0.contains(value) }
+        if valueCards.count >= 2 {
+            return true
+        }
+    }
+    return false
+}
